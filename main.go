@@ -134,14 +134,7 @@ func main() {
 			return
 		}
 	
-		// if balance >= amount{
-		// 	balance=balance-amount
-			
-		// }
-		// if balance==0{
-		// 	json.NewEncoder(w).Encode(map[string]string{"mesage":"insufficient fund"})
-		// 	return
-		// }
+		
 		if balance < amount {
 			json.NewEncoder(w).Encode(map[string]string{"message":"insufficient funds"})
 			return
