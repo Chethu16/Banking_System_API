@@ -29,6 +29,10 @@ type DebitAmount struct{
 	Password string `json:"password"`
 	Amount string `json:"amount"`
 }
+type CheckBalance struct{
+	Email string `json:"email"`
+	Password string `json:"password"`
+}
 
 func main() {
 	db,err:=sql.Open("postgres" , "postgresql://free_d1iq_user:KHOULvBoVAL5elQcbXqE6ZwcRad8nCDr@dpg-d1iecrali9vc73fu5ueg-a.oregon-postgres.render.com/free_d1iq")
@@ -147,6 +151,30 @@ func main() {
 				return
 			}
 			json.NewEncoder(w).Encode(map[string]string{"mesage":"Amount debited Succesfuly"})
+		})
+		http.HandleFunc("/check_balance",func(w http.ResponseWriter,r *http.Request){
+			var userDetails CheckBalance
+			err := json.NewDecoder(r.Body).Decode(&userDetails)
+			if err != nil {
+				fmt.Println("json Decode error")
+				return
+			}
+			query1 := `SELECT balance,password FROM bank_account WHERE email=$1`
+			var balance , password string
+			err = db.QueryRow(query1,userDetails.Email).Scan(&balance,&password)
+			if err != nil {
+				fmt.Println("query error")
+				return
+			}
+			if password == "" || password != userDetails.Password {
+				fmt.Println("incorrect password")
+				return
+			}
+			err = json.NewEncoder(w).Encode(map[string]string{"balance": balance})
+			if err != nil {
+				fmt.Println("json encode error")
+				return
+			}
 		})
 
 	err = http.ListenAndServe(":8000" , nil)
